@@ -1,0 +1,12 @@
+﻿  BPRaycasting.cpp
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(71,17): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(72,17): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(73,17): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(77,14): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(78,14): warning C4244: 'initializing': conversion from 'float' to 'uint8_t', possible loss of data
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(95,72): warning C4244: 'argument': conversion from 'float' to 'const size_t', possible loss of data
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(95,53): warning C4244: 'argument': conversion from 'float' to 'const size_t', possible loss of data
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(97,33): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(102,16): warning C4244: 'initializing': conversion from 'float' to 'size_t', possible loss of data
+C:\Users\Jason\source\repos\BPRaycasting\BPRaycasting\BPRaycasting.cpp(103,16): warning C4244: 'initializing': conversion from 'float' to 'size_t', possible loss of data
+  BPRaycasting.vcxproj -> C:\Users\Jason\source\repos\BPRaycasting\x64\Debug\BPRaycasting.exe
