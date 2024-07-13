@@ -2,6 +2,8 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <vector>
 #include <cstdint>
 #include <cassert>
@@ -18,9 +20,9 @@ void unpack_color(const uint32_t& color, uint8_t& r, uint8_t& g, uint8_t& b, uin
 	a = (color >> 24) & 255;
 }
 
-void drop_ppm_image(const std::string filename, const std::vector<uint32_t>& image, const size_t w, const size_t h) {
+void drop_ppm_image(const std::string filename, const std::vector<uint32_t> &image, const size_t w, const size_t h) {
 	assert(image.size() == w * h);
-	std::ofstream ofs(filename, std::ios::binary);
+	std::ofstream ofs(filename);
 	ofs << "P6\n" << w << " " << h << "\n255\n";
 	for (size_t i = 0; i < h * w; ++i) {
 		uint8_t r, g, b, a;
@@ -36,7 +38,7 @@ void draw_rectangle(std::vector<uint32_t>& img, const size_t img_w, const size_t
 		for (size_t j = 0; j < h; j++) {
 			size_t cx = x + i;
 			size_t cy = y + j;
-			if (cx >= img_w || cy >= img_h) continue; // not checking negative values, (unsigned variables) 
+			if (cx >= img_w || cy >= img_h) continue; // not checking for negative values (unsigned variables) 
 			img[cx + cy * img_w] = color;
 		}
 	}
@@ -74,42 +76,59 @@ int main()
 	float player_a = 1.523; // player view direction
 	const float fov = M_PI / 3.; // field of view 
 
+	const size_t ncolors = 10;
+	std::vector<uint32_t> colors(ncolors);
+	for (size_t i = 0; i < ncolors; i++) {
+		colors[i] = pack_color(rand() % 255, rand() % 255, rand() % 255);
+	}
+
 	const size_t rect_w = win_w / (map_w * 2);
 	const size_t rect_h = win_h / map_h;
-	for (size_t j = 0; j < map_w; j++) {
-		for (size_t i = 0; i < map_w; i++) {
-			if (map[i + j * map_w] == ' ') continue;
-			size_t rect_x = i * rect_w;
-			size_t rect_y = j * rect_h;
-			draw_rectangle(framebuffer, win_w, win_h, rect_x, rect_y, rect_w, rect_h, pack_color(0, 255, 255));
-		}
-	}
 
-	for (size_t i = 0; i < win_w / 2; i++) { // draw the visibility cone and 3d view
+	for (size_t frame = 0; frame < 360; frame++) {
+		std::stringstream ss;
+		ss << std::setfill('0') << std::setw(5) << frame << ".ppm";
+		player_a += 2 * M_PI / 360;
 
-		float angle = player_a - fov / 2 + fov * i / float(win_w / 2);
+		framebuffer = std::vector<uint32_t>(win_w * win_h, pack_color(255, 255, 255)); // clear the screen
 
-		for (float t = 0; t < 20; t += .05) {
-			float cx = player_x + t * cos(angle);
-			float cy = player_y + t * sin(angle);
+		for (size_t j = 0; j < map_h; j++) { // draw the map
+			for (size_t i = 0; i < map_w; i++) {
+				if (map[i + j * map_w] == ' ') continue; // skip empty spaces
 
-
-			size_t pix_x = cx * rect_w;
-			size_t pix_y = cy * rect_h;
-			framebuffer[pix_x + pix_y * win_w] = pack_color(160, 160, 160);
-			// this draws visibility continue
-
-			if (map[int(cx) + int(cy) * map_w] != ' ') { // our ray touches a wall, so draw the vertical column to create an illusion of 3D 
-
-				size_t column_height = win_h / t;
-				draw_rectangle(framebuffer, win_w, win_h, win_w / 2 + i, win_h / 2 - column_height / 2, 1, column_height, pack_color(0, 255, 255));
-				break;
+				size_t rect_x = i * rect_w;
+				size_t rect_y = j * rect_h;
+				size_t icolor = map[i + j * map_w] - '0';
+				assert(icolor < ncolors);
+				draw_rectangle(framebuffer, win_w, win_h, rect_x, rect_y, rect_w, rect_h, colors[icolor]);
 			}
-
 		}
+
+			for (size_t i = 0; i < win_w / 2; i++) { // draw the visibility cone and 3d view
+				float angle = player_a - fov / 2 + fov * i / float(win_w / 2);
+				for (float t = 0; t < 20; t += .01) {
+					float cx = player_x + t * cos(angle);
+					float cy = player_y + t * sin(angle);
+
+					size_t pix_x = cx * rect_w;
+					size_t pix_y = cy * rect_h;
+					framebuffer[pix_x + pix_y * win_w] = pack_color(160, 160, 160);
+					// this draws visibility continue
+
+					if (map[int(cx) + int(cy) * map_w] != ' ') { // our ray touches a wall, so draw the vertical column to create an illusion of 3D
+						size_t icolor = map[int(cx) + int(cy) * map_w] - '0';
+						assert(icolor < ncolors);
+						size_t column_height = win_h / t;
+						draw_rectangle(framebuffer, win_w, win_h, win_w / 2 + i, win_h / 2 - column_height / 2, 1, column_height, colors[icolor]);
+						break;
+					}
+
+			}
+		}
+
+			drop_ppm_image(ss.str(), framebuffer, win_w, win_h);
+
+		return 0;
 	}
 
-	drop_ppm_image("./out.ppm", framebuffer, win_w, win_h);
-
-	return 0;
 }
